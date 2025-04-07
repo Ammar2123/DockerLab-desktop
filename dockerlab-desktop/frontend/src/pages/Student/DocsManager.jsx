@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../../components/Navbar';
-
 const StudentDocuments = () => {
   const [documents, setDocuments] = useState([]);
   const [selectedDocId, setSelectedDocId] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/docs').then((res) => {
+    axios.get('https://dockerlab-desktop.onrender.com/api/docs').then((res) => {
       setDocuments(res.data);
       if (res.data.length > 0) setSelectedDocId(res.data[0]._id); // select first doc by default
     });
@@ -15,8 +14,9 @@ const StudentDocuments = () => {
 
   const selectedDoc = documents.find((doc) => doc._id === selectedDocId);
 
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <Navbar isAdmin={false} />
 
       <div className="flex">

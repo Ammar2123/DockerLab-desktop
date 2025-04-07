@@ -12,7 +12,7 @@ const SemesterImages = () => {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/images');
+        const res = await axios.get('https://dockerlab-desktop.onrender.com/api/images');
         const filtered = res.data.filter(img => img.semester === `Sem ${semNumber}`);
         setDockerImages(filtered);
       } catch (error) {
@@ -39,25 +39,45 @@ const SemesterImages = () => {
   const getOS = (id) => imageOSMap[id] || 'ubuntu';
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 pb-12">
       <Navbar isAdmin={false} />
-      <h1 className="text-3xl font-bold text-center text-indigo-800 mb-6">
-        🧪 Docker Labs - Semester {semNumber}
-      </h1>
+<h1 className="text-3xl font-bold text-center text-indigo-800 mb-6 mt-8">
+  Docker Labs Images - Semester {semNumber}
+</h1>
 
       {dockerImages.length === 0 ? (
         <p className="text-center text-gray-500">No labs available for this semester.</p>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
           {dockerImages.map((img) => (
             <div
               key={img._id}
-              className="bg-white rounded-xl shadow-md border border-gray-200 p-5 hover:shadow-lg transition-all duration-200 cursor-pointer"
               onClick={() => setSelectedImage(img)}
+              className="bg-white rounded-2xl shadow-lg border border-gray-200 p-5 hover:scale-105 transition-transform duration-200 cursor-pointer relative group"
             >
-              <h3 className="text-lg font-semibold text-blue-700 mb-2">
-                {img.semester} - {img.subject}
-              </h3>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">
+                  {img.subject}
+                </span>
+                <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded">
+                  {img.semester}
+                </span>
+              </div>
+
+              <div className="text-sm text-gray-600 mb-2 line-clamp-2">
+                {img.ubuntuInstructions || img.windowsInstructions || 'No instructions provided.'}
+              </div>
+
+              <div className="flex justify-between items-center mt-4">
+                <span className="inline-block text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">
+                  OS: Ubuntu & Windows
+                </span>
+                <span className="text-xs text-gray-400 group-hover:text-indigo-600 transition duration-200">
+                  Click to view
+                </span>
+              </div>
+
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
           ))}
         </div>
@@ -101,7 +121,7 @@ const SemesterImages = () => {
 
             {/* Pull Command */}
             <div className="mb-4">
-              <p className="font-medium text-gray-700">📥 Pull Command</p>
+              <p className="font-medium text-gray-700">Pull Command</p>
               <code className="block bg-gray-100 rounded-lg p-2 text-sm text-gray-800 overflow-x-auto">
                 {getOS(selectedImage._id) === 'ubuntu'
                   ? selectedImage.ubuntuPullCommand
@@ -137,7 +157,7 @@ const SemesterImages = () => {
 
             {/* Run Command */}
             <div className="mb-4">
-              <p className="font-medium text-gray-700">▶️ Run Command</p>
+              <p className="font-medium text-gray-700"> Run Command</p>
               <code className="block bg-gray-100 rounded-lg p-2 text-sm text-gray-800 overflow-x-auto">
                 {getOS(selectedImage._id) === 'ubuntu'
                   ? selectedImage.ubuntuRunCommand
