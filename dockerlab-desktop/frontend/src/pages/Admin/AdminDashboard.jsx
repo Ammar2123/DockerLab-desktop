@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Navbar from '../../components/Navbar';
 
 const AdminDashboard = () => {
   const [dockerImages, setDockerImages] = useState([]);
@@ -53,6 +54,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-10">
+    <Navbar isAdmin={true} />
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
         <h1 className="text-3xl font-bold mb-6 text-center text-blue-700">Add Docker Image</h1>
 

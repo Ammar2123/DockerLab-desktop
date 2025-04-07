@@ -1,6 +1,7 @@
 // src/StudentPortal.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Navbar from '../../components/Navbar';
 
 const StudentPortal = () => {
   const [dockerImages, setDockerImages] = useState([]);
@@ -44,6 +45,7 @@ const StudentPortal = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
+    <Navbar isAdmin={false} />
       <h1 className="text-3xl font-bold mb-6 text-center text-blue-800">🧑‍🎓 Student Portal</h1>
 
       {dockerImages.length === 0 ? (

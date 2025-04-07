@@ -1,92 +1,77 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import Navbar from '../../components/Navbar';
 
-function DocsManager() {
-  const [files, setFiles] = useState([]);
-  const [selectedFile, setSelectedFile] = useState(null);
+const StudentDocuments = () => {
+  const [documents, setDocuments] = useState([]);
+  const [selectedDocId, setSelectedDocId] = useState(null);
 
   useEffect(() => {
-    fetchFiles();
+    axios.get('http://localhost:5000/api/docs').then((res) => {
+      setDocuments(res.data);
+      if (res.data.length > 0) setSelectedDocId(res.data[0]._id); // select first doc by default
+    });
   }, []);
 
-  const fetchFiles = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/docs");
-      setFiles(res.data);
-    } catch (err) {
-      console.error("Error fetching files:", err);
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile) return alert("Please choose a file");
-
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    try {
-      await axios.post("http://localhost:5000/api/docs/upload", formData);
-      setSelectedFile(null);
-      fetchFiles(); // refresh
-    } catch (err) {
-      console.error("Upload error:", err);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/docs/${id}`);
-      fetchFiles();
-    } catch (err) {
-      console.error("Delete error:", err);
-    }
-  };
+  const selectedDoc = documents.find((doc) => doc._id === selectedDocId);
 
   return (
-    <div className="p-5">
-      <h2 className="text-xl mb-4 font-semibold">Manage Documents & Images</h2>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar isAdmin={false} />
 
-      <div className="mb-4">
-        <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])} />
-        <button
-          onClick={handleUpload}
-          className="ml-2 px-3 py-1 bg-green-500 text-white rounded"
-        >
-          Upload
-        </button>
-      </div>
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className="w-64 h-screen overflow-y-auto bg-white shadow-md border-r p-4 sticky top-0">
+          <h2 className="text-xl font-semibold mb-4">Documentation</h2>
+          <ul className="space-y-2">
+            {documents.map((doc) => (
+              <li
+                key={doc._id}
+                onClick={() => setSelectedDocId(doc._id)}
+                className={`cursor-pointer p-2 rounded hover:bg-blue-100 ${
+                  selectedDocId === doc._id ? 'bg-blue-200 font-medium' : ''
+                }`}
+              >
+                {doc.contentBlocks.find((b) => b.type === 'heading')?.value || 'Untitled'}
+              </li>
+            ))}
+          </ul>
+        </aside>
 
-      <div className="grid grid-cols-2 gap-4">
-        {files.map((file) => (
-          <div
-            key={file._id}
-            className="border p-4 rounded bg-white shadow-md"
-          >
-            {file.type.startsWith("image/") ? (
-              <img src={file.url} alt={file.name} className="h-40 w-full object-cover" />
-            ) : (
-              <div className="text-sm">
-                <p>{file.name}</p>
-                <a
-                  href={file.url}
-                  download
-                  className="text-blue-500 underline text-xs"
-                >
-                  Download
-                </a>
-              </div>
-            )}
-            <button
-              onClick={() => handleDelete(file._id)}
-              className="mt-2 text-red-500 text-xs"
-            >
-              Delete
-            </button>
-          </div>
-        ))}
+        {/* Main Content */}
+        <main className="flex-1 p-8 overflow-y-auto">
+          {selectedDoc ? (
+            <div className="bg-white p-6 rounded shadow">
+              {selectedDoc.contentBlocks.map((f, i) => (
+                <div key={i} className="mb-4">
+                  {f.type === 'heading' && (
+                    <h2 className="text-2xl font-bold border-b pb-2 mb-2">{f.value}</h2>
+                  )}
+                  {f.type === 'content' && <p className="text-gray-700">{f.value}</p>}
+                  {f.type === 'command' && (
+                    <div className="bg-gray-100 p-3 rounded flex justify-between items-center">
+                      <code className="text-sm">{f.value}</code>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(f.value)}
+                        className="ml-4 px-2 py-1 text-sm bg-gray-300 rounded hover:bg-gray-400"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  )}
+                  {f.type === 'image' && (
+                    <img src={f.value} alt="Document" className="mt-2 max-w-md rounded border" />
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-600">Select a document from the sidebar.</p>
+          )}
+        </main>
       </div>
     </div>
   );
-}
+};
 
-export default DocsManager;
+export default StudentDocuments;
