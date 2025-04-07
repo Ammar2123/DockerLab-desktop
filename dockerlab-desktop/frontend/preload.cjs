@@ -1,5 +1,8 @@
-const { contextBridge } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Add APIs here if needed later
+  runDockerCommand: (cmd) => {
+    console.log("🔌 Preload sending command:", cmd);
+    return ipcRenderer.invoke('run-docker-command', cmd);
+  },
 });

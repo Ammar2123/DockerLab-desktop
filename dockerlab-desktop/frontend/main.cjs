@@ -2,43 +2,25 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 
-let mainWindow;
-
 function createWindow() {
-  mainWindow = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.cjs'),
+      preload: path.join(__dirname, 'preload.cjs'), // ✅ Absolute path
       contextIsolation: true,
       nodeIntegration: false,
     },
   });
 
-  mainWindow.loadURL('http://localhost:5173');
-  mainWindow.webContents.openDevTools();
+  win.loadURL('http://localhost:5173');
+  win.webContents.openDevTools(); // Check DevTools
 }
 
-ipcMain.handle('run-command', async (event, command) => {
-  return new Promise((resolve, reject) => {
-    const cmdProcess = spawn('cmd.exe', ['/c', 'start', 'cmd.exe', '/k', command]);
+app.whenReady().then(createWindow);
 
-    cmdProcess.on('error', (err) => {
-      reject(`Failed to start CMD: ${err.message}`);
-    });
-
-    resolve('Command launched in CMD');
-  });
-});
-
-app.whenReady().then(() => {
-  createWindow();
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
-});
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+ipcMain.handle('run-docker-command', async (_, cmd) => {
+  console.log('🟢 Received Docker command:', cmd);
+  const scriptPath = path.join(__dirname, 'scripts', 'run_command.py');
+  spawn('python', [scriptPath, cmd], { shell: true });
 });

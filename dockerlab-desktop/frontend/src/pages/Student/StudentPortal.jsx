@@ -1,3 +1,4 @@
+// src/StudentPortal.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -9,13 +10,37 @@ const StudentPortal = () => {
       const res = await axios.get('http://localhost:5000/api/images');
       setDockerImages(res.data);
     } catch (error) {
-      console.error('Failed to fetch images:', error);
+      console.error('❌ Failed to fetch images:', error);
     }
   };
 
   useEffect(() => {
     fetchImages();
+    console.log('👀 Checking window.electronAPI:', window.electronAPI);
+
+    if (window.electronAPI && window.electronAPI.runDockerCommand) {
+      console.log('✅ electronAPI is available');
+    } else {
+      console.error('❌ electronAPI is undefined');
+    }
   }, []);
+
+  const handleRunCommand = (cmd) => {
+    console.log("🖱️ Run button clicked with command:", cmd);
+
+    if (!cmd) {
+      console.error("❌ Command is undefined or empty!");
+      return;
+    }
+
+    if (window.electronAPI && window.electronAPI.runDockerCommand) {
+      console.log("🟨 Running command from React:", cmd);
+      window.electronAPI.runDockerCommand(cmd);
+    } else {
+      console.error("❌ electronAPI.runDockerCommand is not available.");
+      alert("Electron API not available.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
@@ -39,12 +64,20 @@ const StudentPortal = () => {
                 <code className="block bg-gray-100 rounded p-2 text-sm break-words text-gray-800">
                   {img.pullCommand}
                 </code>
-                <button
-                  onClick={() => navigator.clipboard.writeText(img.pullCommand)}
-                  className="mt-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded"
-                >
-                  Copy
-                </button>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => navigator.clipboard.writeText(img.pullCommand)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded"
+                  >
+                    Copy
+                  </button>
+                  <button
+                    onClick={() => handleRunCommand(img.pullCommand)}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-3 py-1 rounded"
+                  >
+                    Run
+                  </button>
+                </div>
               </div>
 
               <div className="mb-4">
@@ -52,12 +85,20 @@ const StudentPortal = () => {
                 <code className="block bg-gray-100 rounded p-2 text-sm break-words text-gray-800">
                   {img.runCommand}
                 </code>
-                <button
-                  onClick={() => navigator.clipboard.writeText(img.runCommand)}
-                  className="mt-2 bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded"
-                >
-                  Copy
-                </button>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => navigator.clipboard.writeText(img.runCommand)}
+                    className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded"
+                  >
+                    Copy
+                  </button>
+                  <button
+                    onClick={() => handleRunCommand(img.runCommand)}
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-3 py-1 rounded"
+                  >
+                    Run
+                  </button>
+                </div>
               </div>
 
               <div className="text-sm text-gray-600">

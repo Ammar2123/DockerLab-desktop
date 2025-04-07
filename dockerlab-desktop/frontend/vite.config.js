@@ -8,6 +8,9 @@ export default defineConfig({
     alias: {
       '@': path.resolve('./src'),
     },
+  },build: {
+    outDir: 'dist',
+    target: 'chrome105', // or latest Electron-compatible target
   },
   server: {
     port: 5173,
