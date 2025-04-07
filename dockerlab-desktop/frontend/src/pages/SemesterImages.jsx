@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import Navbar from '../../components/Navbar';
+import Navbar from '../components/Navbar';
 
-const StudentPortal = () => {
+const SemesterImages = () => {
+  const { semNumber } = useParams();
   const [dockerImages, setDockerImages] = useState([]);
-  const [search, setSearch] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageOSMap, setImageOSMap] = useState({});
 
@@ -12,20 +13,15 @@ const StudentPortal = () => {
     const fetchImages = async () => {
       try {
         const res = await axios.get('http://localhost:5000/api/images');
-        setDockerImages(res.data);
+        const filtered = res.data.filter(img => img.semester === `Sem ${semNumber}`);
+        setDockerImages(filtered);
       } catch (error) {
-        console.error('❌ Failed to fetch images:', error);
+        console.error('Failed to fetch images:', error);
       }
     };
 
     fetchImages();
-
-    if (window.electronAPI?.runDockerCommand) {
-      console.log('✅ electronAPI is available');
-    } else {
-      console.error('❌ electronAPI is undefined');
-    }
-  }, []);
+  }, [semNumber]);
 
   const handleRunCommand = (cmd) => {
     if (!cmd) return alert('❌ Command is missing!');
@@ -37,51 +33,37 @@ const StudentPortal = () => {
   };
 
   const handleOSChange = (id, os) => {
-    setImageOSMap((prev) => ({ ...prev, [id]: os }));
+    setImageOSMap(prev => ({ ...prev, [id]: os }));
   };
 
   const getOS = (id) => imageOSMap[id] || 'ubuntu';
 
-  const filteredImages = dockerImages.filter((img) =>
-    img.subject?.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
-    <div className="min-h-screen bg-gray-50 p-6 relative">
+    <div className="min-h-screen bg-gray-100 p-8">
       <Navbar isAdmin={false} />
+      <h1 className="text-3xl font-bold text-center text-indigo-800 mb-6">
+        🧪 Docker Labs - Semester {semNumber}
+      </h1>
 
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-center text-blue-900 mb-8">Student Labs</h1>
-
-        <div className="mb-6 flex justify-center">
-          <input
-            type="text"
-            placeholder="🔍 Search by subject name..."
-            className="w-full md:w-1/2 px-4 py-2 rounded-xl border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      {dockerImages.length === 0 ? (
+        <p className="text-center text-gray-500">No labs available for this semester.</p>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {dockerImages.map((img) => (
+            <div
+              key={img._id}
+              className="bg-white rounded-xl shadow-md border border-gray-200 p-5 hover:shadow-lg transition-all duration-200 cursor-pointer"
+              onClick={() => setSelectedImage(img)}
+            >
+              <h3 className="text-lg font-semibold text-blue-700 mb-2">
+                {img.semester} - {img.subject}
+              </h3>
+            </div>
+          ))}
         </div>
+      )}
 
-        {filteredImages.length === 0 ? (
-          <p className="text-center text-gray-500 italic">No matching labs found.</p>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {filteredImages.map((img) => (
-              <div
-                key={img._id}
-                className="bg-white border border-gray-200 rounded-2xl shadow-md p-5 hover:shadow-xl transition duration-300 cursor-pointer"
-                onClick={() => setSelectedImage(img)}
-              >
-                <h3 className="text-xl font-semibold text-indigo-700">
-                  {img.semester} - {img.subject}
-                </h3>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
+      {/* Modal */}
       {selectedImage && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-center items-center">
           <div className="bg-white w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl p-6 relative shadow-lg">
@@ -98,21 +80,19 @@ const StudentPortal = () => {
 
             <div className="flex justify-center mb-4 space-x-2">
               <button
-                className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                  getOS(selectedImage._id) === 'ubuntu'
+                className={`px-3 py-1 rounded-lg text-sm font-medium ${getOS(selectedImage._id) === 'ubuntu'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-700'
-                }`}
+                  }`}
                 onClick={() => handleOSChange(selectedImage._id, 'ubuntu')}
               >
                 Ubuntu
               </button>
               <button
-                className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                  getOS(selectedImage._id) === 'windows'
+                className={`px-3 py-1 rounded-lg text-sm font-medium ${getOS(selectedImage._id) === 'windows'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-700'
-                }`}
+                  }`}
                 onClick={() => handleOSChange(selectedImage._id, 'windows')}
               >
                 Windows
@@ -212,4 +192,4 @@ const StudentPortal = () => {
   );
 };
 
-export default StudentPortal;
+export default SemesterImages;

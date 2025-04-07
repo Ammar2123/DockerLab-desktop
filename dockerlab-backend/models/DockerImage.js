@@ -1,12 +1,15 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const DockerImageSchema = new mongoose.Schema({
+const dockerImageSchema = new mongoose.Schema({
   semester: String,
   subject: String,
-  pullCommand: String,
-  runCommand: String,
-  instructions: String,
-  notes: String,
+  ubuntuPullCommand: String,
+  ubuntuRunCommand: String,
+  windowsPullCommand: String,
+  windowsRunCommand: String,
+  ubuntuInstructions: String,
+  windowsInstructions: String,
+  notes: String
 });
 
-module.exports = mongoose.model("DockerImage", DockerImageSchema);
+module.exports = mongoose.model('DockerImage', dockerImageSchema);

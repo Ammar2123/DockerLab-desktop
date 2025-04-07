@@ -4,12 +4,16 @@ import Navbar from '../../components/Navbar';
 
 const AdminDashboard = () => {
   const [dockerImages, setDockerImages] = useState([]);
+  const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({
     semester: '',
     subject: '',
-    pullCommand: '',
-    runCommand: '',
-    instructions: '',
+    ubuntuPullCommand: '',
+    ubuntuRunCommand: '',
+    windowsPullCommand: '',
+    windowsRunCommand: '',
+    ubuntuInstructions: '',
+    windowsInstructions: '',
     notes: ''
   });
 
@@ -22,23 +26,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    try {
-      await axios.post('http://localhost:5000/api/images', form, axiosConfig);
-      fetchImages();
-      setForm({
-        semester: '',
-        subject: '',
-        pullCommand: '',
-        runCommand: '',
-        instructions: '',
-        notes: ''
-      });
-    } catch (error) {
-      console.error('Error adding image:', error);
-    }
-  };
-
   const fetchImages = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/images', axiosConfig);
@@ -48,15 +35,66 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleSubmit = async () => {
+    try {
+      if (editId) {
+        await axios.put(`http://localhost:5000/api/images/${editId}`, form, axiosConfig);
+        setEditId(null);
+      } else {
+        await axios.post('http://localhost:5000/api/images', form, axiosConfig);
+      }
+      fetchImages();
+      setForm({
+        semester: '',
+        subject: '',
+        ubuntuPullCommand: '',
+        ubuntuRunCommand: '',
+        windowsPullCommand: '',
+        windowsRunCommand: '',
+        ubuntuInstructions: '',
+        windowsInstructions: '',
+        notes: ''
+      });
+    } catch (error) {
+      console.error('Error submitting image:', error);
+    }
+  };
+
+  const handleEdit = (image) => {
+    setForm({
+      semester: image.semester,
+      subject: image.subject,
+      ubuntuPullCommand: image.ubuntuPullCommand || '',
+      ubuntuRunCommand: image.ubuntuRunCommand || '',
+      windowsPullCommand: image.windowsPullCommand || '',
+      windowsRunCommand: image.windowsRunCommand || '',
+      ubuntuInstructions: image.ubuntuInstructions || '',
+      windowsInstructions: image.windowsInstructions || '',
+      notes: image.notes || ''
+    });
+    setEditId(image._id);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/images/${id}`, axiosConfig);
+      fetchImages();
+    } catch (error) {
+      console.error('Error deleting image:', error);
+    }
+  };
+
   useEffect(() => {
     fetchImages();
   }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 p-10">
-    <Navbar isAdmin={true} />
+      <Navbar isAdmin={true} />
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-3xl font-bold mb-6 text-center text-blue-700">Add Docker Image</h1>
+        <h1 className="text-3xl font-bold mb-6 text-center text-blue-700">
+          {editId ? 'Edit Docker Image' : 'Add Docker Image'}
+        </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <select
@@ -77,25 +115,44 @@ const AdminDashboard = () => {
           />
           <input
             className="border rounded-lg p-2"
-            placeholder="Pull Command"
-            value={form.pullCommand}
-            onChange={(e) => setForm({ ...form, pullCommand: e.target.value })}
+            placeholder="Ubuntu Pull Command"
+            value={form.ubuntuPullCommand}
+            onChange={(e) => setForm({ ...form, ubuntuPullCommand: e.target.value })}
           />
           <input
             className="border rounded-lg p-2"
-            placeholder="Run Command"
-            value={form.runCommand}
-            onChange={(e) => setForm({ ...form, runCommand: e.target.value })}
+            placeholder="Ubuntu Run Command"
+            value={form.ubuntuRunCommand}
+            onChange={(e) => setForm({ ...form, ubuntuRunCommand: e.target.value })}
+          />
+          <input
+            className="border rounded-lg p-2"
+            placeholder="Windows Pull Command"
+            value={form.windowsPullCommand}
+            onChange={(e) => setForm({ ...form, windowsPullCommand: e.target.value })}
+          />
+          <input
+            className="border rounded-lg p-2"
+            placeholder="Windows Run Command"
+            value={form.windowsRunCommand}
+            onChange={(e) => setForm({ ...form, windowsRunCommand: e.target.value })}
           />
         </div>
 
         <div className="mt-4">
           <textarea
             className="w-full border rounded-lg p-2 mb-2"
-            placeholder="Instructions"
-            rows="3"
-            value={form.instructions}
-            onChange={(e) => setForm({ ...form, instructions: e.target.value })}
+            placeholder="Ubuntu Instructions"
+            rows="2"
+            value={form.ubuntuInstructions}
+            onChange={(e) => setForm({ ...form, ubuntuInstructions: e.target.value })}
+          />
+          <textarea
+            className="w-full border rounded-lg p-2 mb-2"
+            placeholder="Windows Instructions"
+            rows="2"
+            value={form.windowsInstructions}
+            onChange={(e) => setForm({ ...form, windowsInstructions: e.target.value })}
           />
           <textarea
             className="w-full border rounded-lg p-2"
@@ -111,7 +168,7 @@ const AdminDashboard = () => {
             onClick={handleSubmit}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition duration-300"
           >
-            Add Image
+            {editId ? 'Update Image' : 'Add Image'}
           </button>
         </div>
       </div>
@@ -130,12 +187,27 @@ const AdminDashboard = () => {
                 <h3 className="text-lg font-semibold text-blue-600">
                   {img.semester} - {img.subject}
                 </h3>
-                <p className="text-sm text-gray-700">
-                  <strong>Pull:</strong> {img.pullCommand}
-                </p>
-                <p className="text-sm text-gray-700">
-                  <strong>Run:</strong> {img.runCommand}
-                </p>
+                <p className="text-sm text-gray-700"><strong>Ubuntu Pull:</strong> {img.ubuntuPullCommand}</p>
+                <p className="text-sm text-gray-700"><strong>Ubuntu Run:</strong> {img.ubuntuRunCommand}</p>
+                <p className="text-sm text-gray-700"><strong>Windows Pull:</strong> {img.windowsPullCommand}</p>
+                <p className="text-sm text-gray-700"><strong>Windows Run:</strong> {img.windowsRunCommand}</p>
+                <p className="text-sm text-gray-700"><strong>Ubuntu Instructions:</strong> {img.ubuntuInstructions}</p>
+                <p className="text-sm text-gray-700"><strong>Windows Instructions:</strong> {img.windowsInstructions}</p>
+                <p className="text-sm text-gray-700"><strong>Notes:</strong> {img.notes}</p>
+                <div className="mt-2 flex gap-4">
+                  <button
+                    onClick={() => handleEdit(img)}
+                    className="text-yellow-600 font-medium hover:underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(img._id)}
+                    className="text-red-600 font-medium hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>

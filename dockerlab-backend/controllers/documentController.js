@@ -32,6 +32,19 @@ exports.getDocumentById = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+exports.updateDocument = async (req, res) => {
+  try {
+    const { title = "Untitled Document", fields } = req.body;
+    const updatedDoc = await Document.findByIdAndUpdate(
+      req.params.id,
+      { title, contentBlocks: fields },
+      { new: true }
+    );
+    res.json(updatedDoc);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 exports.deleteDocument = async (req, res) => {
   try {

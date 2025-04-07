@@ -9,9 +9,9 @@ const Navbar = ({ isAdmin }) => {
       <nav className="flex justify-between items-center p-6 bg-white shadow">
         <h1 className="text-xl font-bold text-blue-700">Admin Dashboard</h1>
         <div className="flex gap-4">
-          <Link to="/admin/dashboard" className={linkStyle(location, "/admin/dashboard")}>Home</Link>
-          <Link to="/admin/create-labs" className={linkStyle(location, "/admin/create-labs")}>Create Labs</Link>
-          <Link to="/admin/create-docs" className={linkStyle(location, "/admin/create-docs")}>Create Documentation</Link>
+          <Link to="/admin/home" className={linkStyle(location, "/admin/dashboard")}>Home</Link>
+          <Link to="/admin/dashboard" className={linkStyle(location, "/admin/create-labs")}>Create Labs</Link>
+          <Link to="/admin/docs" className={linkStyle(location, "/admin/create-docs")}>Create Documentation</Link>
           <Link to="/" className="text-red-500">Logout</Link>
         </div>
       </nav>
@@ -24,6 +24,7 @@ const Navbar = ({ isAdmin }) => {
       <div className="flex gap-6 text-blue-600 font-medium">
       <Link to="/" className={linkStyle(location, "/")}>HOME</Link>
         <Link to="/student" className={linkStyle(location, "/student")}>Labs</Link>
+        <Link to="/semesters" className={linkStyle(location, "/student")}>Semesters</Link>
         <Link to="/student/docs" className={linkStyle(location, "/student/docs")}>Documentation</Link>
         <Link to="/admin/login" className={linkStyle(location, "/admin/login")}>Admin Portal</Link>
       </div>
